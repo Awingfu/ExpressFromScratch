@@ -10,7 +10,33 @@ app.set('view engine', 'pug')
 
 // Default route
 app.get('/', (req,res) => {
-    res.render("index")
+    let items = [
+        {
+            id: 1,
+            description: "first item",
+            weight: 50
+        },
+        {
+            id: 2,
+            description: "second item",
+            weight: 24
+        },
+        {
+            id: 3,
+            description: "third item",
+            weight: 88
+        }
+    ]
+    res.render("index", {
+        header1: "Index",
+        items
+    })
+    // res.send('Hello World');
+});
+
+// Add route
+app.get('/add', (req,res) => {
+    res.render("add");
     // res.send('Hello World');
 });
 
