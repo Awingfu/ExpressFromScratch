@@ -1,8 +1,30 @@
 const express = require('express');
 const path = require('path');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+
+mongoose.connect('mongodb://localhost/nodekb')
+let db = mongoose.connection;
+
+// Check DB connection
+db.once('open', () => {
+    console.log("connected to DB")
+});
+
+// Check for DB errors
+db.on('error', (err) => console.log(err));
 
 // Init app
 const app = express();
+
+// Use body-parser middleware for post requests
+// To Parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({extended: false}));
+// To Parse application/json
+app.use(bodyParser.json());
+
+// Import Models
+const Article = require('./models/article');
 
 // Load view engine
 app.set('views', path.join(__dirname,'views'));
@@ -10,34 +32,41 @@ app.set('view engine', 'pug')
 
 // Default route
 app.get('/', (req,res) => {
-    let items = [
-        {
-            id: 1,
-            description: "first item",
-            weight: 50
-        },
-        {
-            id: 2,
-            description: "second item",
-            weight: 24
-        },
-        {
-            id: 3,
-            description: "third item",
-            weight: 88
+    Article.find({}, (err, articles) => {
+        if (err) {
+            console.log(err);
         }
-    ]
-    res.render("index", {
-        header1: "Index",
-        items
-    })
-    // res.send('Hello World');
+        else {
+            res.render("index", {
+                title: "Articles",
+                items: articles
+            })
+        }
+    });
 });
 
 // Add route
 app.get('/add', (req,res) => {
-    res.render("add");
-    // res.send('Hello World');
+    res.render("add", {
+        title: "Add Articles" 
+    });
+});
+
+// Post route
+app.post('/add', (req,res) => {
+    let article = new Article();
+    article.title = req.body.title;
+    article.author = req.body.author;
+    article.body = req.body.body;
+
+    article.save((err)=>{
+        if(err) {
+            console.log(err);
+            res.render("error");
+        } else {
+            res.redirect('/');
+        }
+    });
 });
 
 // Port to start server on

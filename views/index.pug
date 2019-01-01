@@ -1,6 +1,8 @@
 extends layout
+
 block content
-    h1 #{header1}
+    h1 #{title}
+    h2 Items in MongoDB
     ol
         each item, i in items
-            li= item.description
+            li= item.title
